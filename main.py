@@ -1,3 +1,5 @@
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
 from robot_boards import random_grid
 import sys
@@ -215,14 +217,24 @@ while True:
 			if key not in directions or state['mode'] != 'direction':
 				continue
 			direction = directions[key]
+			origin = state['position']
 			destination = state['movements'][direction]
 			if destination is not None:
-				grid[destination].figure = grid[i, j].figure
-				grid[i, j].figure = None
-				state['mode'] = 'figure'
+				grid[destination].figure = grid[origin].figure
+				grid[origin].figure = None
 				state['counter'] += 1
 				target = state['target']
 				reset()
+				state['movements'] = grid.search(destination)
+				for pos in state['movements'].values():
+					if pos is not None:
+						pygame.draw.line(screen, 
+							DARK(COLOURS[grid[destination].figure.colour]), 
+							translate_inv(destination), 
+							translate_inv(pos), 
+							MEDIUM)
+				state['position'] = destination
+
 				if target is not None and target.figure is not None and target.figure.colour == target.colour:
 					state['mode'] = 'validate'
 					draw_grid()
