@@ -11,10 +11,10 @@ from playsound import playsound
 from threading import Thread
 
 
-MAN = """The GOAL_SQUARE is the coloured one. The GOAL is to move the robot with the same colour on it. Robots are alowed to move in the directions NORTH, EAST, SOUTH and WEST. Once a robot is moved in one of those directions, it moves until it hits a wall or another robot. This counts as a single MOVE. All players play simultaniously. Once a player finds a solution that player may proclaim the number of moves and hit the bell (SPACE). Now a countdown of 30 seconds starts during which all other players may try to find faster solutions which they themselves then may proclaim. The countdown ends with the same bell sound that it started with. You can cancle the countdown by pressing SPACE again.
+MAN = """The GOAL_SQUARE is the coloured one. The GOAL is to move the robot with the same colour on it. Robots are allowed to move in the directions NORTH, EAST, SOUTH and WEST. Once a robot is moved in one of those directions, it moves until it hits a wall or another robot. This counts as a single MOVE. All players play simultaniously. Once a player finds a solution, that player may proclaim the number of moves and hit the bell (SPACE). Now a countdown of 30 seconds starts during which all other players may try to find faster solutions, which they themselves then may proclaim. The countdown ends with the same bell sound that it started with. You can cancel the countdown by pressing SPACE again.
 After the countdown the player who proclaimed the fastest solution must present it. 
-If the player cannot do so, the player with the second fastest solution may present thier solution, and afterwards the third and so on.
-To move a robot you have to click on it and then choose the direction (↑, ←, ↓, →) or alternatively (W, A, S, D). You can reset the board by pressing BACKSPACE. If you want to commit to a solution you can press ENTER. Afterwards a new GOAL_SQUARE is selected and the next round begins. You can end the game by pressing ESC."""
+If the player cannot do so, the player with the second fastest solution may present their solution, afterwards the third and so on.
+To move a robot, you have to click on it and then choose the direction (↑, ←, ↓, →) or alternatively (W, A, S, D). You can reset the board by pressing BACKSPACE. If you want to commit to a solution you can press ENTER. Afterwards a new GOAL_SQUARE is selected and the next round begins. You can end the game by pressing ESC."""
 
 
 def print_title(title):
@@ -47,7 +47,7 @@ GREY   = [0x88, 0x88, 0x88]
 WHITE  = [0xff, 0xff, 0xff]
 RED    = [0xff, 0x00, 0x00]
 GREEN  = [0x00, 0xee, 0x00]
-YELLOW = [0xff, 0xff, 0x33]
+YELLOW = [0xff, 0xdd , 0x33]
 BLUE   = [0x00, 0x88, 0xff]
 
 DARK = lambda c, l=0.7: [int(c[0] * l), int(c[1] * l), int(c[2] * l)]
@@ -221,10 +221,10 @@ while True:
 						colour = COLOURS[grid[i, j].figure.colour]
 						pygame.draw.circle(screen, DARK(colour, 0.3), 
 							(y * CELL_H + CELL_H//2, x * CELL_W + CELL_W//2), 
-							min(CELL_H, CELL_W)//4 - BIG)
+							min(CELL_H, CELL_W)//5 - BIG)
 						pygame.draw.circle(screen, DARK(colour, 0.7), 
 							(y * CELL_H + CELL_H//2, x * CELL_W + CELL_W//2), 
-							min(CELL_H, CELL_W)//4 - BIG - SMALL)
+							min(CELL_H, CELL_W)//5 - BIG - SMALL)
 						pygame.draw.line(screen, 
 							DARK(colour), 
 							translate_inv((i, j)), 
@@ -286,10 +286,10 @@ while True:
 							MEDIUM)
 						pygame.draw.circle(screen, DARK(colour, 0.3), 
 							(j * CELL_H + CELL_H//2, i * CELL_W + CELL_W//2), 
-							min(CELL_H, CELL_W)//4 - BIG)
+							min(CELL_H, CELL_W)//5 - BIG)
 						pygame.draw.circle(screen, DARK(colour, 0.7), 
 							(j * CELL_H + CELL_H//2, i * CELL_W + CELL_W//2), 
-							min(CELL_H, CELL_W)//4 - BIG - SMALL)
+							min(CELL_H, CELL_W)//5 - BIG - SMALL)
 				STATE['position'] = destination
 
 				if target is not None and target.figure is not None and target.figure.colour == target.colour:
