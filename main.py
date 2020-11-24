@@ -7,6 +7,30 @@ from time import sleep
 from grid import *
 from random import choice
 from copy import deepcopy
+from playsound import playsound
+from threading import Thread
+
+
+MAN = """The GOAL_SQUARE is the coloured one. The GOAL is to move the robot with the same colour on it. Robots are alowed to move in the directions NORTH, EAST, SOUTH and WEST. Once a robot is moved in one of those directions, it moves until it hits a wall or another robot. This counts as a single MOVE. All players play simultaniously. Once a player finds a solution that player may proclaim the number of moves and hit the bell (SPACE). Now a countdown of 30 seconds starts during which all other players may try to find faster solutions which they themselves then may proclaim. The countdown ends with the same bell sound that it started with. You can cancle the countdown by pressing SPACE again.
+After the countdown the player who proclaimed the fastest solution must present it. 
+If the player cannot do so, the player with the second fastest solution may present thier solution, and afterwards the third and so on.
+To move a robot you have to click on it and then choose the direction (↑, ←, ↓, →) or alternatively (W, A, S, D). You can reset the board by pressing BACKSPACE. If you want to commit to a solution you can press ENTER. Afterwards a new GOAL_SQUARE is selected and the next round begins. You can end the game by pressing ESC."""
+
+
+def print_title(title):
+	print("""
+	┌─{0}─┐
+	│ {1} │
+	└─{0}─┘
+""".format(len(title)*'─', title.upper()))
+
+os.system('clear')
+print_title('RICOCHET ROBOT')
+print(MAN)
+
+
+BELL_FILE = 'bell.mp3'
+TIME = 30
 
 CELL_W, CELL_H = 60, 60
 SIZE = WIDTH, HEIGHT = CELL_W * 16, CELL_H * 16
@@ -65,22 +89,22 @@ directions = {
 	276: 'west',
 }
 
-state = {'mode': 'figure', 'movements': None, 'position': None, 'target': None, 'counter': 0}
+STATE = {'mode': 'figure', 'movements': None, 'position': None, 'target': None, 'counter': 0, 'countdown': False}
 
 def draw_grid():
-	global grid, state
+	global grid, STATE
 
-	if state['target'] is not None:
-		target = state['target']
+	if STATE['target'] is not None:
+		target = STATE['target']
 		j, i = target.pos
 		pygame.draw.rect(screen, DARK(COLOURS[target.colour], 0.7), (i * CELL_H, j * CELL_W, CELL_H, CELL_W))
 		pygame.draw.rect(screen, DARK(COLOURS[target.colour], 0.6), (i * CELL_H + MEDIUM, j * CELL_W + MEDIUM, CELL_H - 2 * MEDIUM, CELL_W - 2 * MEDIUM))
 		pygame.draw.rect(screen, DARK(COLOURS[target.colour], 0.7), (i * CELL_H + BIG, j * CELL_W + BIG, CELL_H - 2 * BIG, CELL_W - 2 * BIG))
 
-	if state['counter']:
+	if STATE['counter']:
 		font = pygame.font.SysFont(None, 128)
-		img = font.render(str(state['counter']), True, BLACK)
-		screen.blit(img, (int((7.6 if state['counter'] < 10 else 7.2) * CELL_W), int(7.35 * CELL_H)))
+		img = font.render(str(STATE['counter']), True, BLACK)
+		screen.blit(img, (int((7.6 if STATE['counter'] < 10 else 7.2) * CELL_W), int(7.35 * CELL_H)))
 	# GRID
 	for i in range(16):
 		if i != 8:
@@ -156,6 +180,16 @@ def translate_inv(pos):
 	return int((y + 0.5) * CELL_W), int((x + 0.5) * CELL_H)
 
 
+def countdown():
+	global STATE, BELL_FILE, TIME			
+	Thread(target=lambda: playsound(BELL_FILE)).start()
+	for _ in range(TIME):
+		if not STATE['countdown']:
+			return
+		sleep(1)
+	Thread(target=lambda: playsound(BELL_FILE)).start()
+
+
 reset = lambda: screen.fill(WHITE)
 update = lambda: pygame.display.update()
 
@@ -165,7 +199,7 @@ draw_figures()
 update()
 
 quater = choice(grid.quaters)
-state['target'] = choice([square for square in quater.colours if square.figure is None or square.figure.colour != square.colour])
+STATE['target'] = choice([square for square in quater.colours if square.figure is None or square.figure.colour != square.colour])
 grid_copy = deepcopy(grid)
 grid_copy = deepcopy(grid)
 
@@ -174,29 +208,33 @@ while True:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			quit()
-		elif event.type == 5 and state['mode'] in ('figure', 'direction'):
+		elif event.type == 5 and STATE['mode'] in ('figure', 'direction'):
 			i, j = translate(event.__dict__['pos'])
 			reset()
 			if grid[i, j].figure is not None:
-				state['movements'] = grid.search((i, j))
-				for b in state['movements'].values():
+				STATE['movements'] = grid.search((i, j))
+				for b in STATE['movements'].values():
 					if b is not None:
 						pygame.draw.line(screen, 
 							DARK(COLOURS[grid[i, j].figure.colour]), 
 							translate_inv((i, j)), 
 							translate_inv(b), 
 							MEDIUM)
-				state['mode'] = 'direction'
-				state['position'] = (i, j)
+				STATE['mode'] = 'direction'
+				STATE['position'] = (i, j)
 		elif event.type == 2:
 			key = event.__dict__['key']
 			if key == 27:
 				quit()
-			if key == 13 and state['mode'] == 'validate':
+			if key == 32:
+				STATE['countdown'] = not STATE['countdown']
+				if STATE['countdown']:
+					Thread(target=countdown).start()
+			if key == 13 and STATE['mode'] == 'validate':
 				quater = choice(grid.quaters)
-				state['target'] = choice([square for square in quater.colours if square.figure is None or square.figure.colour != square.colour])
-				state['mode'] = 'figure'
-				state['counter'] = 0
+				STATE['target'] = choice([square for square in quater.colours if square.figure is None or square.figure.colour != square.colour])
+				STATE['mode'] = 'figure'
+				STATE['counter'] = 0
 				grid_copy = deepcopy(grid)
 				reset()
 				draw_grid()
@@ -205,38 +243,38 @@ while True:
 			if key == 8:
 				grid = grid_copy
 				grid_copy = deepcopy(grid)
-				state['target'] = grid[state['target'].pos]
-				state['mode'] = 'figure'
-				state['movements'] = None
-				state['position'] = None
-				state['counter'] = 0
+				STATE['target'] = grid[STATE['target'].pos]
+				STATE['mode'] = 'figure'
+				STATE['movements'] = None
+				STATE['position'] = None
+				STATE['counter'] = 0
 				reset()
 				draw_grid()
 				draw_figures()
 				update()
-			if key not in directions or state['mode'] != 'direction':
+			if key not in directions or STATE['mode'] != 'direction':
 				continue
 			direction = directions[key]
-			origin = state['position']
-			destination = state['movements'][direction]
+			origin = STATE['position']
+			destination = STATE['movements'][direction]
 			if destination is not None:
 				grid[destination].figure = grid[origin].figure
 				grid[origin].figure = None
-				state['counter'] += 1
-				target = state['target']
+				STATE['counter'] += 1
+				target = STATE['target']
 				reset()
-				state['movements'] = grid.search(destination)
-				for pos in state['movements'].values():
+				STATE['movements'] = grid.search(destination)
+				for pos in STATE['movements'].values():
 					if pos is not None:
 						pygame.draw.line(screen, 
 							DARK(COLOURS[grid[destination].figure.colour]), 
 							translate_inv(destination), 
 							translate_inv(pos), 
 							MEDIUM)
-				state['position'] = destination
+				STATE['position'] = destination
 
 				if target is not None and target.figure is not None and target.figure.colour == target.colour:
-					state['mode'] = 'validate'
+					STATE['mode'] = 'validate'
 					draw_grid()
 					draw_figures()
 					update()
