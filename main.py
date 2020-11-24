@@ -207,6 +207,7 @@ grid_copy = deepcopy(grid)
 while True:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
+			print()
 			quit()
 		elif event.type == 5 and STATE['mode'] in ('figure', 'direction'):
 			i, j = translate(event.__dict__['pos'])
@@ -214,18 +215,27 @@ while True:
 			reset()
 			if grid[i, j].figure is not None:
 				STATE['movements'] = grid.search((i, j))
-				for b in STATE['movements'].values():
-					if b is not None:
+				for pos in STATE['movements'].values():
+					if pos is not None:
+						x, y = pos
+						colour = COLOURS[grid[i, j].figure.colour]
+						pygame.draw.circle(screen, DARK(colour, 0.3), 
+							(y * CELL_H + CELL_H//2, x * CELL_W + CELL_W//2), 
+							min(CELL_H, CELL_W)//4 - BIG)
+						pygame.draw.circle(screen, DARK(colour, 0.7), 
+							(y * CELL_H + CELL_H//2, x * CELL_W + CELL_W//2), 
+							min(CELL_H, CELL_W)//4 - BIG - SMALL)
 						pygame.draw.line(screen, 
-							DARK(COLOURS[grid[i, j].figure.colour]), 
+							DARK(colour), 
 							translate_inv((i, j)), 
-							translate_inv(b), 
+							translate_inv(pos), 
 							MEDIUM)
 				STATE['mode'] = 'direction'
 				STATE['position'] = (i, j)
 		elif event.type == 2:
 			key = event.__dict__['key']
 			if key == 27:
+				print()
 				quit()
 			if key == 32:
 				STATE['countdown'] = not STATE['countdown']
@@ -267,11 +277,19 @@ while True:
 				STATE['movements'] = grid.search(destination)
 				for pos in STATE['movements'].values():
 					if pos is not None:
+						i, j = pos
+						colour = COLOURS[grid[destination].figure.colour]
 						pygame.draw.line(screen, 
-							DARK(COLOURS[grid[destination].figure.colour]), 
+							DARK(colour), 
 							translate_inv(destination), 
 							translate_inv(pos), 
 							MEDIUM)
+						pygame.draw.circle(screen, DARK(colour, 0.3), 
+							(j * CELL_H + CELL_H//2, i * CELL_W + CELL_W//2), 
+							min(CELL_H, CELL_W)//4 - BIG)
+						pygame.draw.circle(screen, DARK(colour, 0.7), 
+							(j * CELL_H + CELL_H//2, i * CELL_W + CELL_W//2), 
+							min(CELL_H, CELL_W)//4 - BIG - SMALL)
 				STATE['position'] = destination
 
 				if target is not None and target.figure is not None and target.figure.colour == target.colour:
