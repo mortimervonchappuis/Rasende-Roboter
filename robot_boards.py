@@ -72,7 +72,6 @@ from random import choice, shuffle
 from grid import *
 from os import system
 
-system('clear')
 
 walls = {
 	'x': [],
@@ -211,7 +210,7 @@ D_b = to_quater(d_b)
 
 
 #G = Grid([D_b.rotate(0), B_b.rotate(1), C_b.rotate(3), A_b.rotate(2)])
-G = Grid([A_f.rotate(0), B_f.rotate(1), D_f.rotate(3), C_f.rotate(2)])
+#G = Grid([A_f.rotate(0), B_f.rotate(1), D_f.rotate(3), C_f.rotate(2)])
 #print(G)
 
 def random_grid(verbose = False):

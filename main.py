@@ -6,7 +6,7 @@ from grid import *
 from random import choice
 from copy import deepcopy
 
-CELL_W, CELL_H = 48, 48
+CELL_W, CELL_H = 60, 60
 SIZE = WIDTH, HEIGHT = CELL_W * 16, CELL_H * 16
 
 # LINES
@@ -63,7 +63,7 @@ directions = {
 	276: 'west',
 }
 
-state = {'mode': 'validate', 'movements': None, 'position': None, 'target': None}
+state = {'mode': 'figure', 'movements': None, 'position': None, 'target': None, 'counter': 0}
 
 def draw_grid():
 	global grid, state
@@ -75,7 +75,10 @@ def draw_grid():
 		pygame.draw.rect(screen, DARK(COLOURS[target.colour], 0.6), (i * CELL_H + MEDIUM, j * CELL_W + MEDIUM, CELL_H - 2 * MEDIUM, CELL_W - 2 * MEDIUM))
 		pygame.draw.rect(screen, DARK(COLOURS[target.colour], 0.7), (i * CELL_H + BIG, j * CELL_W + BIG, CELL_H - 2 * BIG, CELL_W - 2 * BIG))
 
-	
+	if state['counter']:
+		font = pygame.font.SysFont(None, 128)
+		img = font.render(str(state['counter']), True, BLACK)
+		screen.blit(img, (int((7.6 if state['counter'] < 10 else 7.2) * CELL_W), int(7.35 * CELL_H)))
 	# GRID
 	for i in range(16):
 		if i != 8:
@@ -159,6 +162,9 @@ draw_grid()
 draw_figures()
 update()
 
+quater = choice(grid.quaters)
+state['target'] = choice([square for square in quater.colours if square.figure is None or square.figure.colour != square.colour])
+grid_copy = deepcopy(grid)
 grid_copy = deepcopy(grid)
 
 
@@ -182,11 +188,13 @@ while True:
 				state['position'] = (i, j)
 		elif event.type == 2:
 			key = event.__dict__['key']
+			if key == 27:
+				quit()
 			if key == 13 and state['mode'] == 'validate':
-				state['target'] = None
-				state['mode'] = 'figure'
 				quater = choice(grid.quaters)
 				state['target'] = choice([square for square in quater.colours if square.figure is None or square.figure.colour != square.colour])
+				state['mode'] = 'figure'
+				state['counter'] = 0
 				grid_copy = deepcopy(grid)
 				reset()
 				draw_grid()
@@ -199,6 +207,7 @@ while True:
 				state['mode'] = 'figure'
 				state['movements'] = None
 				state['position'] = None
+				state['counter'] = 0
 				reset()
 				draw_grid()
 				draw_figures()
@@ -211,6 +220,7 @@ while True:
 				grid[destination].figure = grid[i, j].figure
 				grid[i, j].figure = None
 				state['mode'] = 'figure'
+				state['counter'] += 1
 				target = state['target']
 				reset()
 				if target is not None and target.figure is not None and target.figure.colour == target.colour:
