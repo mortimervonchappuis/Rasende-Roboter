@@ -184,9 +184,9 @@ def countdown():
 	global STATE, BELL_FILE, TIME			
 	Thread(target=lambda: playsound(BELL_FILE)).start()
 	for _ in range(TIME):
+		sleep(1)
 		if not STATE['countdown']:
 			return
-		sleep(1)
 	Thread(target=lambda: playsound(BELL_FILE)).start()
 
 
@@ -210,6 +210,7 @@ while True:
 			quit()
 		elif event.type == 5 and STATE['mode'] in ('figure', 'direction'):
 			i, j = translate(event.__dict__['pos'])
+			STATE['countdown'] = False
 			reset()
 			if grid[i, j].figure is not None:
 				STATE['movements'] = grid.search((i, j))
