@@ -276,7 +276,7 @@ while True:
 				reset()
 				STATE['movements'] = grid.search(destination)
 				for pos in STATE['movements'].values():
-					if pos is not None:
+					if pos is not None and (target is None or target.figure is None or target.figure.colour != target.colour):
 						i, j = pos
 						colour = COLOURS[grid[destination].figure.colour]
 						pygame.draw.line(screen, 
