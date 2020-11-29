@@ -1,5 +1,6 @@
 from colorama import Fore
 
+
 class Grid:
 	def __init__(self, quaters):
 		self.quaters = quaters

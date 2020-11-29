@@ -24,6 +24,7 @@ def print_title(title):
 	└─{0}─┘
 """.format(len(title)*'─', title.upper()))
 
+
 os.system('clear')
 print_title('RICOCHET ROBOT')
 print(MAN)
@@ -36,19 +37,22 @@ CELL_W, CELL_H = 60, 60
 SIZE = WIDTH, HEIGHT = CELL_W * 16, CELL_H * 16
 
 # LINES
-SMALL = 1
+TINY = 1
+SMALL = 2
 MEDIUM = 3
 LARGE = 4
 BIG = 5
+
+LINE_W = BIG
 
 # COLOURS 
 BLACK  = [0x00, 0x00, 0x00]
 GREY   = [0x88, 0x88, 0x88]
 WHITE  = [0xff, 0xff, 0xff]
-RED    = [0xff, 0x00, 0x00]
-GREEN  = [0x00, 0xee, 0x00]
-YELLOW = [0xff, 0xdd , 0x33]
-BLUE   = [0x00, 0x88, 0xff]
+RED    = [0xcc, 0x00, 0x00]
+GREEN  = [0x00, 0xcc, 0x55]
+YELLOW = [0xff, 0xdd , 0x55]
+BLUE   = [0x00, 0x88, 0xcc]
 
 DARK = lambda c, l=0.7: [int(c[0] * l), int(c[1] * l), int(c[2] * l)]
 
@@ -97,9 +101,9 @@ def draw_grid():
 	if STATE['target'] is not None:
 		target = STATE['target']
 		j, i = target.pos
-		pygame.draw.rect(screen, DARK(COLOURS[target.colour], 0.7), (i * CELL_H, j * CELL_W, CELL_H, CELL_W))
+		pygame.draw.rect(screen, DARK(COLOURS[target.colour], 0.8), (i * CELL_H, j * CELL_W, CELL_H, CELL_W))
 		pygame.draw.rect(screen, DARK(COLOURS[target.colour], 0.6), (i * CELL_H + MEDIUM, j * CELL_W + MEDIUM, CELL_H - 2 * MEDIUM, CELL_W - 2 * MEDIUM))
-		pygame.draw.rect(screen, DARK(COLOURS[target.colour], 0.7), (i * CELL_H + BIG, j * CELL_W + BIG, CELL_H - 2 * BIG, CELL_W - 2 * BIG))
+		pygame.draw.rect(screen, DARK(COLOURS[target.colour], 0.8), (i * CELL_H + BIG, j * CELL_W + BIG, CELL_H - 2 * BIG, CELL_W - 2 * BIG))
 
 	if STATE['counter']:
 		font = pygame.font.SysFont(None, 128)
@@ -110,23 +114,23 @@ def draw_grid():
 		if i != 8:
 			pygame.draw.line(screen, GREY, 
 				(0, i * CELL_W), 
-				(HEIGHT, i * CELL_W), SMALL)
+				(HEIGHT, i * CELL_W), TINY)
 			pygame.draw.line(screen, GREY, 
 				(i * CELL_H, 0), 
-				(i * CELL_H, WIDTH), SMALL)
+				(i * CELL_H, WIDTH), TINY)
 		else:
 			pygame.draw.line(screen, GREY, 
 				(0, i * CELL_W), 
-				(7 * CELL_H, i * CELL_W), SMALL)
+				(7 * CELL_H, i * CELL_W), TINY)
 			pygame.draw.line(screen, GREY, 
 				(9 * CELL_H, i * CELL_W), 
-				(HEIGHT, i * CELL_W), SMALL)
+				(HEIGHT, i * CELL_W), TINY)
 			pygame.draw.line(screen, GREY, 
 				(i * CELL_H, 0), 
-				(i * CELL_H, 7 * CELL_W), SMALL)
+				(i * CELL_H, 7 * CELL_W), TINY)
 			pygame.draw.line(screen, GREY, 
 				(i * CELL_H, 9 * CELL_W), 
-				(i * CELL_H, WIDTH), SMALL)
+				(i * CELL_H, WIDTH), TINY)
 
 	for i in range(16):
 		for j in range(16):
@@ -135,24 +139,24 @@ def draw_grid():
 			# WALLS
 			if square.north:
 				pygame.draw.line(screen, BLACK, 
-					(j * CELL_H, i * CELL_W), 
-					((j + 1) * CELL_H, i * CELL_W), 
-					LARGE)
+					(j * CELL_H - LINE_W//2, i * CELL_W), 
+					((j + 1) * CELL_H + LINE_W//2, i * CELL_W), 
+					LINE_W)
 			if square.east:
 				pygame.draw.line(screen, BLACK, 
-					((j + 1) * CELL_H, i * CELL_W), 
-					((j + 1) * CELL_H, (i + 1) * CELL_W), 
-					LARGE)
+					((j + 1) * CELL_H, i * CELL_W - LINE_W//2), 
+					((j + 1) * CELL_H, (i + 1) * CELL_W + LINE_W//2), 
+					LINE_W)
 			if square.south:
 				pygame.draw.line(screen, BLACK, 
-					(j * CELL_H, (i + 1) * CELL_W), 
-					((j + 1) * CELL_H, (i + 1) * CELL_W), 
-					LARGE)
+					(j * CELL_H - LINE_W//2, (i + 1) * CELL_W), 
+					((j + 1) * CELL_H + LINE_W//2, (i + 1) * CELL_W), 
+					LINE_W)
 			if square.west:
 				pygame.draw.line(screen, BLACK, 
-					(j * CELL_H, i * CELL_W), 
-					(j * CELL_H, (i + 1) * CELL_W),  
-					LARGE)
+					(j * CELL_H, i * CELL_W - LINE_W//2), 
+					(j * CELL_H, (i + 1) * CELL_W + LINE_W//2),  
+					LINE_W)
 
 
 def draw_figures():
@@ -162,10 +166,10 @@ def draw_figures():
 		for j in range(16):
 			if (figure := grid[i, j].figure) is not None:
 				colour = COLOURS[figure.colour]
-				pygame.draw.circle(screen, DARK(colour, 0.3), 
+				pygame.draw.circle(screen, DARK(colour, 0.5), 
 					(j * CELL_H + CELL_H//2, i * CELL_W + CELL_W//2), 
 					min(CELL_H, CELL_W)//2 - BIG)
-				pygame.draw.circle(screen, DARK(colour, 0.7), 
+				pygame.draw.circle(screen, DARK(colour, 0.8), 
 					(j * CELL_H + CELL_H//2, i * CELL_W + CELL_W//2), 
 					min(CELL_H, CELL_W)//2 - BIG - SMALL)
 
@@ -207,7 +211,7 @@ grid_copy = deepcopy(grid)
 while True:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
-			print()
+			os.system('clear')
 			quit()
 		elif event.type == 5 and STATE['mode'] in ('figure', 'direction'):
 			i, j = translate(event.__dict__['pos'])
@@ -222,9 +226,9 @@ while True:
 						pygame.draw.circle(screen, DARK(colour, 0.3), 
 							(y * CELL_H + CELL_H//2, x * CELL_W + CELL_W//2), 
 							min(CELL_H, CELL_W)//5 - BIG)
-						pygame.draw.circle(screen, DARK(colour, 0.7), 
+						pygame.draw.circle(screen, DARK(colour, 0.8), 
 							(y * CELL_H + CELL_H//2, x * CELL_W + CELL_W//2), 
-							min(CELL_H, CELL_W)//5 - BIG - SMALL)
+							min(CELL_H, CELL_W)//5 - BIG - TINY)
 						pygame.draw.line(screen, 
 							DARK(colour), 
 							translate_inv((i, j)), 
@@ -235,14 +239,14 @@ while True:
 		elif event.type == 2:
 			key = event.__dict__['key']
 			if key == 27:
-				print()
+				os.system('clear')
 				quit()
 			if key == 32:
 				STATE['countdown'] = not STATE['countdown']
 				if STATE['countdown']:
 					Thread(target=countdown).start()
 			if key == 13 and STATE['mode'] == 'validate':
-				quater = choice(grid.quaters)
+				quater = choice([quater for quater in grid.quaters if any(square.figure is None or square.figure.colour != square.colour for square in quater.colours)])
 				STATE['target'] = choice([square for square in quater.colours if square.figure is None or square.figure.colour != square.colour])
 				STATE['mode'] = 'figure'
 				STATE['counter'] = 0
@@ -264,12 +268,14 @@ while True:
 				draw_figures()
 				update()
 			if key not in directions or STATE['mode'] != 'direction':
-				continue
+				break
 			direction = directions[key]
 			origin = STATE['position']
 			destination = STATE['movements'][direction]
 			if destination is not None:
 				grid[destination].figure = grid[origin].figure
+				if origin  == destination:
+					raise Exception('ARGH')
 				grid[origin].figure = None
 				STATE['counter'] += 1
 				target = STATE['target']
@@ -287,9 +293,9 @@ while True:
 						pygame.draw.circle(screen, DARK(colour, 0.3), 
 							(j * CELL_H + CELL_H//2, i * CELL_W + CELL_W//2), 
 							min(CELL_H, CELL_W)//5 - BIG)
-						pygame.draw.circle(screen, DARK(colour, 0.7), 
+						pygame.draw.circle(screen, DARK(colour, 0.8), 
 							(j * CELL_H + CELL_H//2, i * CELL_W + CELL_W//2), 
-							min(CELL_H, CELL_W)//5 - BIG - SMALL)
+							min(CELL_H, CELL_W)//5 - BIG - TINY)
 				STATE['position'] = destination
 
 				if target is not None and target.figure is not None and target.figure.colour == target.colour:
