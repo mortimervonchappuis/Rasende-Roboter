@@ -84,13 +84,13 @@ BLUE_F   = Figure('blue',   (12, 12), grid)
 
 directions = {
 	119: 'north', 
-	273: 'north', 
+	1073741906: 'north', 
 	115: 'south', 
-	274: 'south', 
+	1073741905: 'south', 
 	100: 'east', 
-	275: 'east', 
+	1073741903: 'east', 
 	97: 'west', 
-	276: 'west',
+	1073741904: 'west',
 }
 
 STATE = {'mode': 'figure', 'movements': None, 'position': None, 'target': None, 'counter': 0, 'countdown': False}
@@ -213,7 +213,7 @@ while True:
 		if event.type == pygame.QUIT:
 			os.system('clear')
 			quit()
-		elif event.type == 5 and STATE['mode'] in ('figure', 'direction'):
+		elif event.type == 1025 and STATE['mode'] in ('figure', 'direction'):
 			i, j = translate(event.__dict__['pos'])
 			STATE['countdown'] = False
 			reset()
@@ -236,7 +236,7 @@ while True:
 							MEDIUM)
 				STATE['mode'] = 'direction'
 				STATE['position'] = (i, j)
-		elif event.type == 2:
+		elif event.type == 768:
 			key = event.__dict__['key']
 			if key == 27:
 				os.system('clear')
